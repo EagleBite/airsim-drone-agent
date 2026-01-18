@@ -11,6 +11,8 @@ from openai import OpenAI
 from ..client import MLLMClient, MLLMResult
 from ..messages import ImagePart, Message, Role, TextPart
 
+from airsim_drone_agent.utils.logger import get_logger
+
 @dataclass
 class _Cfg:
     base_url: str
@@ -22,6 +24,7 @@ class OpenAIProvider(MLLMClient):
     def __init__(self, cfg: _Cfg):
         self.cfg = cfg
         self.client = OpenAI(base_url=cfg.base_url, api_key=cfg.api_key)
+        self.logger = get_logger(__name__)
 
     @classmethod
     def from_env(cls, env_path: str = ".env") -> "OpenAIProvider":
@@ -54,9 +57,8 @@ class OpenAIProvider(MLLMClient):
             out.append({"role": role, "content": parts})
 
         return out
-
     
-    def generate(self, messages, *, json_schema = None, max_tokens = 400):
+    def generate(self, messages, *, json_schema = None, max_tokens: int = None):
         openai_messages = self._to_openai_messages(messages)
 
         kwargs: Dict[str, Any] = {
@@ -65,11 +67,20 @@ class OpenAIProvider(MLLMClient):
         }
 
         if json_schema is not None:
-            kwargs["response_format"] = {"type": "json_schema", "json_schema": json_schema}
+            kwargs["response_format"] = {
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "response_schema",
+                    "schema": json_schema
+                }
+            }
         
-        kwargs["max_completion_tokens"] = max_tokens
+        if max_tokens is not None:
+            kwargs["max_tokens"] = max_tokens
             
+        self.logger.info("调用 OpenAI API...")
         resp = self.client.chat.completions.create(**kwargs)
+        self.logger.info("OpenAI API 响应...")
 
         text = (resp.choices[0].message.content or "").strip()
 

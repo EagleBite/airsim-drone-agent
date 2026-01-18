@@ -15,6 +15,16 @@ class MLLMResult:
 class MLLMClient(ABC):
 
     @abstractmethod
-    def generate(self, messages: List[Message], *, 
-                 json_schema: Optional[Dict[str, Any]] = None, max_tokens: int = 400):
+    def generate(self, messages: List[Message], *, json_schema: Optional[Dict[str, Any]] = None, max_tokens: Optional[int] = None):
+        """
+        生成响应
+        
+        Args:
+            messages: 消息列表
+            json_schema: 可选的 JSON Schema，用于约束返回格式（某些 API 可能不支持）
+            max_tokens: 可选的最大输出 token 数（某些 API 可能不支持）
+        
+        Returns:
+            MLLMResult: 包含文本和解析后的 JSON
+        """
         raise NotImplementedError

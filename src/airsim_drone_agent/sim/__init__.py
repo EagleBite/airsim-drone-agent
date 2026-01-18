@@ -1,12 +1,13 @@
-from .airsim_client import AirSimClient, ConnectionConfig
-from .sensors import SensorHub, ImageFrame, LidarCloud
-from .drone_env import DroneEnv
+from .connection import ConnectionManager, ConnectionConfig
+from .airsim_client import AirSimClient
+from .flight_controller import FlightController
+from .sensors import SensorHub, ImageFrame
 
 __all__ = [
-    "AirSimClient",
+    "ConnectionManager",
     "ConnectionConfig",
+    "AirSimClient",
+    "FlightController",
     "SensorHub",
     "ImageFrame",
-    "LidarCloud",
-    "DroneEnv",
 ]
